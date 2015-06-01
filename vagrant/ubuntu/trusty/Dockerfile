@@ -20,5 +20,16 @@ RUN mkdir -p /home/vagrant/.ssh
 ADD https://raw.githubusercontent.com/mitchellh/vagrant/master/keys/vagrant.pub /home/vagrant/.ssh/authorized_keys
 RUN chown -R vagrant: /home/vagrant/.ssh
 
+# DinD - Docker in Docker
+RUN apt-get update -qq && apt-get install -qqy \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    lxc \
+    iptables
+RUN curl -sLS https://get.docker.io | sh
+RUN usermod -aG docker vagrant
+RUN curl -sLS https://raw.githubusercontent.com/docker/docker/master/hack/dind -o /dind && chmod +x /dind
+
 EXPOSE 22
-CMD ["/usr/sbin/sshd", "-D"]
+CMD ["/dind", "/usr/sbin/sshd", "-D"]
